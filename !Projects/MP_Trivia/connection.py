@@ -3,6 +3,7 @@ import json
 import pandas as pd
 from html import unescape
 from interface import TriviaOptionSelector
+from dbengine import DBRequests
 
 
 class TriviaConnection:
@@ -55,17 +56,29 @@ class TriviaConnection:
             pattern += f"&type={q_type}"
         if self.token:
             pattern += f"&token={self.token}"
-
-        return pattern, q_difficulty
+        return pattern
 
     def get_questions(self):
-        request_url, q_difficulty = self.compile_user_request()
+        request_url = self.compile_user_request()
         with urllib.request.urlopen(request_url) as url:
             answer = json.loads(url.read().decode())
             if answer['response_code'] == 0:
                 questions = pd.DataFrame(answer['results'])
                 questions = questions.applymap(TriviaConnection.clear_html_symbols)
-                questions['difficulty'] = q_difficulty if q_difficulty else 'mixed'
+
                 return questions
             else:
                 return None
+
+    def populate_database(self, n_requests):
+        database = DBRequests()
+        api_request = f"https://opentdb.com/api.php?amount=50&token={self.token}"
+        for i in range(n_requests):
+            with urllib.request.urlopen(api_request) as url:
+                answer = json.loads(url.read().decode())
+                if answer['response_code'] == 0:
+                    questions = pd.DataFrame(answer['results'])
+                    questions = questions.applymap(TriviaConnection.clear_html_symbols)
+                    for _, q_series in questions.iterrows():
+                        database.add_question2db(q_series)
+

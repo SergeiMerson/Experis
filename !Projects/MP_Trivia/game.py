@@ -1,10 +1,10 @@
-from connection import TriviaConnection
-from user import User
-from interface import ask_question, choose_user
 import pandas as pd
 import pickle
 from tabulate import tabulate
 
+from connection import TriviaConnection
+from user import User
+from interface import ask_question, choose_user
 
 class Game:
     users = []

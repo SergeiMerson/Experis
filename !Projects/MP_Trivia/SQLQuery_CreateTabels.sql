@@ -1,0 +1,75 @@
+USE Trivia;
+GO
+
+DROP TABLE IF EXISTS dbo.GameResults
+DROP TABLE IF EXISTS dbo.Games
+DROP TABLE IF EXISTS dbo.Users
+DROP TABLE IF EXISTS dbo.qAnswers
+DROP TABLE IF EXISTS dbo.Questions
+DROP TABLE IF EXISTS dbo.qTypes
+DROP TABLE IF EXISTS dbo.qDifficulties
+DROP TABLE IF EXISTS dbo.qCategories
+
+
+CREATE TABLE qCategories (
+	CategoryID		SMALLINT	PRIMARY KEY,
+	Category		VARCHAR(50)	NOT NULL
+);
+
+
+
+CREATE TABLE qDifficulties (
+	DifficultyID	VARCHAR(10)	PRIMARY KEY,
+	Difficulty		VARCHAR(10)	NOT NULL
+);
+
+
+
+CREATE TABLE qTypes (
+	TypeID			VARCHAR(10)	PRIMARY KEY,
+	Type			VARCHAR(20)	NOT NULL
+);
+
+
+
+CREATE TABLE Questions (
+	QuestionID		INT			IDENTITY PRIMARY KEY,
+	CategoryID		SMALLINT	FOREIGN KEY REFERENCES qCategories(CategoryID),
+	DifficultyID	VARCHAR(10)	FOREIGN KEY REFERENCES qDifficulties(DifficultyID),
+	TypeID			VARCHAR(10)	FOREIGN KEY REFERENCES qTypes(TypeID),
+	Question	VARCHAR(300)	NOT NULL UNIQUE
+);
+
+
+
+CREATE TABLE qAnswers (
+	AnswerID		INT			IDENTITY PRIMARY KEY,
+	QuestionID		INT			FOREIGN KEY REFERENCES Questions(QuestionID),
+	Answer			VARCHAR(99)	NOT NULL,
+	IsCorrect		BIT			NOT NULL DEFAULT 0
+);
+
+
+
+CREATE TABLE Users (
+	UserID			INT			IDENTITY PRIMARY KEY,
+	UserName		VARCHAR(30)	NOT NULL
+);
+
+
+
+CREATE TABLE Games (
+	GameID			INT			IDENTITY PRIMARY KEY,
+	UserID			INT			FOREIGN KEY REFERENCES Users(UserID),
+	GameDate		DATE		NOT NULL CHECK (GameDate <= GETDATE())
+);
+
+
+
+CREATE TABLE GameResults (
+	GameID			INT			FOREIGN KEY REFERENCES Games(GameID),
+	QuestionID		INT			FOREIGN KEY REFERENCES Questions(QuestionID),
+	AnswerID		INT			FOREIGN KEY REFERENCES qAnswers(AnswerID)
+);
+
+GO
